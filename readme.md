@@ -49,6 +49,7 @@ in diesen Versionsspannen unveraendert.
 | Datei | Zweck |
 |---|---|
 | `build_offline_bundle.sh` | Baut das Bundle (laeuft auf dem Build-Rechner mit Internet/Nexus) |
+| `test.sh` | Prueft ein gebautes Bundle lokal, bevor es auf den Zielserver kopiert wird |
 | `requirements-offline.txt` | Tatsaechlich benoetigte Abhaengigkeiten (ohne `python-consul`) |
 | `templates/start.sh` | Startskript, wird ins Bundle kopiert |
 | `templates/config.yaml.example` | Beispiel-Konfiguration (JMX-Endpunkte) |
@@ -120,7 +121,24 @@ Das Script:
 
 `--help` zeigt alle Optionen.
 
-### 2. Auf den Zielserver kopieren
+### 2. Bundle lokal testen (empfohlen, bevor es auf den Server kopiert wird)
+
+```bash
+./test.sh
+```
+
+`test.sh` entpackt das zuletzt gebaute `dist/hadoop_exporter_offline_*.tar.gz`
+(oder einen als Argument uebergebenen Pfad) in ein Temp-Verzeichnis und
+startet `start.sh` bewusst mit `env -i` – also in einer komplett leeren
+Umgebung ohne `PYTHONPATH`, ohne aktives venv, ohne sonstige Umgebungsvariablen
+des Build-Rechners. Das simuliert den offline Zielserver so genau wie
+moeglich: Wenn der Exporter dabei startet und `/metrics` mit HTTP 200 und
+echten Prometheus-Metriken antwortet, ist das Bundle wirklich
+selbstenthalten. Am Ende raeumt das Script Prozess und Temp-Verzeichnis
+automatisch wieder auf. `NameResolutionError`-Warnungen im Log sind dabei
+normal, da die Beispiel-JMX-URLs nicht real aufloesbar sind.
+
+### 3. Auf den Zielserver kopieren
 
 ```bash
 scp dist/hadoop_exporter_offline_<datum>.tar.gz* zielserver:/tmp/
@@ -128,7 +146,7 @@ ssh zielserver 'sha256sum -c /tmp/hadoop_exporter_offline_<datum>.tar.gz.sha256'
 ssh zielserver 'mkdir -p /opt/hadoop_exporter && tar xzf /tmp/hadoop_exporter_offline_<datum>.tar.gz -C /opt/hadoop_exporter --strip-components=1'
 ```
 
-### 3. Konfigurieren
+### 4. Konfigurieren
 
 ```bash
 ssh zielserver 'cp /opt/hadoop_exporter/config/config.yaml.example /opt/hadoop_exporter/config/config.yaml'
@@ -140,7 +158,7 @@ der Datei). Unterstuetzte `services`-Schluessel in dieser Version:
 `namenode`, `datanode`, `journalnode`, `resourcemanager`, `nodemanager`,
 `hiveserver2`.
 
-### 4. Starten
+### 5. Starten
 
 ```bash
 ssh zielserver '/opt/hadoop_exporter/start.sh'
@@ -155,7 +173,7 @@ curl http://localhost:9123/metrics
 `start.sh` setzt `PYTHONPATH` auf `vendor/` + `app/` und startet
 `app/service.py` direkt mit dem System-`python3` – ohne venv, ohne `pip`.
 
-### 5. Optional: als systemd-Service
+### 6. Optional: als systemd-Service
 
 ```bash
 ssh zielserver 'sudo cp /opt/hadoop_exporter/hadoop_exporter.service /etc/systemd/system/'

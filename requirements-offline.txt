@@ -1,0 +1,8 @@
+# Tatsaechlich vom Code importierte Abhaengigkeiten (siehe readme.md, Abschnitt
+# "Warum python-consul fehlt"). Versionen wurden gegenueber requirements.txt
+# angehoben, weil fuer die dort gepinnten Versionen keine Wheels fuer
+# Python 3.11 existieren (reine Neuvertaggung, keine API-Aenderung fuer den
+# hier genutzten Code).
+requests==2.31.0
+prometheus-client==0.20.0
+pyyaml==6.0.1

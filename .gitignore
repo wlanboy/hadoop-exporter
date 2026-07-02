@@ -1,0 +1,23 @@
+# Ergebnis von build_offline_bundle.sh
+dist/
+*.tar.gz
+*.tar.gz.sha256
+
+# falls Wheels/Checkout/Bundle mal lokal statt in mktemp landen
+wheelhouse/
+vendor/
+src/
+hadoop_exporter_offline/
+
+# lokal generierte Config (Vorlage bleibt: templates/config.yaml.example)
+config/config.yaml
+
+# Laufzeit-Logs des Exporters
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

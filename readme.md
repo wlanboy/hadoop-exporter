@@ -173,15 +173,37 @@ curl http://localhost:9123/metrics
 `start.sh` setzt `PYTHONPATH` auf `vendor/` + `app/` und startet
 `app/service.py` direkt mit dem System-`python3` – ohne venv, ohne `pip`.
 
-### 6. Optional: als systemd-Service
+### 6. Optional: als systemd User-Service
+
+Laeuft als der jeweilige Nicht-root-User, ohne `sudo` und ohne Eintrag unter
+`/etc/systemd/system/`:
 
 ```bash
-ssh zielserver 'sudo cp /opt/hadoop_exporter/hadoop_exporter.service /etc/systemd/system/'
-ssh zielserver 'sudo systemctl daemon-reload && sudo systemctl enable --now hadoop_exporter'
+ssh zielserver 'mkdir -p ~/.config/systemd/user'
+ssh zielserver 'cp /opt/hadoop_exporter/hadoop_exporter.service ~/.config/systemd/user/'
+ssh zielserver 'systemctl --user daemon-reload && systemctl --user enable --now hadoop_exporter'
 ```
 
-Pfad in der Unit-Datei anpassen, falls nicht nach `/opt/hadoop_exporter`
-entpackt wurde.
+Die Unit nutzt `%h` (Home-Verzeichnis des Users) fuer `WorkingDirectory` und
+`ExecStart`, d.h. sie erwartet das Bundle standardmaessig unter
+`~/hadoop_exporter`. Falls stattdessen nach `/opt/hadoop_exporter` entpackt
+wurde (siehe Schritt 3), `%h/hadoop_exporter` in der Unit-Datei durch den
+tatsaechlichen Pfad ersetzen.
+
+Damit der Service auch ohne aktive SSH-Session bzw. nach einem Reboot laeuft
+(User-Units werden sonst beim Logout beendet), zusaetzlich Lingering fuer den
+User aktivieren:
+
+```bash
+ssh zielserver 'loginctl enable-linger $(whoami)'
+```
+
+Status/Logs pruefen:
+
+```bash
+ssh zielserver 'systemctl --user status hadoop_exporter'
+ssh zielserver 'journalctl --user -u hadoop_exporter -f'
+```
 
 ## Troubleshooting
 

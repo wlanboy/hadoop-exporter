@@ -1,0 +1,27 @@
+# Exporter-Serverkonfiguration
+server:
+  address: 0.0.0.0   # Adresse, auf der der Exporter lauscht
+  port: 9123          # Port, siehe auch EXPOSE in etwaigen Firewall-Regeln
+  path: /metrics
+  period: 30          # Sekunden zwischen zwei Scrape-Zyklen
+
+# Liste der JMX-Endpunkte, von denen Metriken gescraped werden.
+# Unterstuetzte services in dieser Version: namenode, datanode, journalnode,
+# resourcemanager, nodemanager, hiveserver2
+# (hmaster/hregionserver/mapred_jobhistory sind im Code aktuell auskommentiert
+# und werden nur mit einer Warnung ignoriert, falls hier eingetragen.)
+jmx:
+  - cluster: hadoop_prod
+    services:
+      namenode:
+        - http://nn1:9870/jmx
+      datanode:
+        - http://dn1:9864/jmx
+        - http://dn2:9864/jmx
+      resourcemanager:
+        - http://rm1:8088/jmx
+      nodemanager:
+        - http://nm1:8042/jmx
+        - http://nm2:8042/jmx
+      hiveserver2:
+        - http://hs2:10002/jmx

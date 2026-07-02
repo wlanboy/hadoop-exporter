@@ -1,0 +1,22 @@
+[Unit]
+Description=Hadoop Prometheus Exporter (offline bundle, kein Docker)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Pfad anpassen: dorthin, wohin das Bundle auf dem Zielserver entpackt wurde
+WorkingDirectory=/opt/hadoop_exporter
+ExecStart=/opt/hadoop_exporter/start.sh
+Restart=on-failure
+RestartSec=5s
+
+# Falls der Exporter nicht als root laufen soll (empfohlen):
+# User=hadoop_exporter
+# Group=hadoop_exporter
+
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

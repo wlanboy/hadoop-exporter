@@ -100,6 +100,24 @@ Standardkonfiguration bzw. pypi.org):
   --src-dir ../hadoop_exporter
 ```
 
+Beispiel fuer einen Zielserver mit **Red Hat 8** und Python **3.9.25**
+(z.B. `python39` aus dem AppStream-Repo, `python3.9 --version` auf dem
+Zielserver pruefen):
+
+```bash
+./build_offline_bundle.sh \
+  --index-url http://localhost:8081/repository/pypi-proxy/simple/  \
+  --py-version 3.9 \
+  --abi cp39 \
+  --arch x86_64 \
+  --src-dir ../hadoop_exporter
+```
+
+> `--py-version` erwartet nur `Major.Minor` (hier `3.9`), keine Patch-Version.
+> Die Patch-Version (`.25`) ist fuer das Wheel-Matching irrelevant – sowohl
+> pip's `--python-version` als auch der ABI-Tag `cp39` unterscheiden nicht
+> zwischen 3.9.x-Patchleveln.
+
 > Achtung bei mehrzeiligen Befehlen: **jede** Zeile ausser der letzten braucht
 > ein `\` am Ende. Fehlt es (wie z.B. nach `--arch x86_64`), fuehrt die Shell
 > die naechste Zeile als eigenes Kommando aus – daher Fehler wie
